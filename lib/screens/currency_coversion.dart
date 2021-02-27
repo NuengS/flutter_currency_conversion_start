@@ -14,6 +14,7 @@ class _ConverterState extends State<Converter> {
   String fromCurrency = "THB";
   String toCurrency = "USD";
   final currencyValue = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   void fromCurrencyChange(String newFromCurrency) {
     setState(() {
@@ -30,21 +31,21 @@ class _ConverterState extends State<Converter> {
   @override
   Widget build(BuildContext context) {
     return Form(
+      key: _formKey,
       child: Column(
         children: [
           TextFormField(
             controller: currencyValue,
+            validator: (value) {
+              if (value.isEmpty) {
+                return 'Please enter Number';
+              }
+              return null;
+            },
             inputFormatters: [
               // ignore: deprecated_member_use
               WhitelistingTextInputFormatter(RegExp("[0-9]"))
             ],
-            validator: (inputcurrencyValue) {
-              if (inputcurrencyValue.isEmpty) {
-                return "Please input currencyValue";
-              } else {
-                return null;
-              }
-            },
             keyboardType: TextInputType.number,
             style: TextStyle(color: Colors.white),
             decoration: InputDecoration(
@@ -86,19 +87,20 @@ class _ConverterState extends State<Converter> {
           GestureDetector(
             onTap: () {
               //Code Here
+              if (_formKey.currentState.validate()) {
+                final covertedValue = CurrencyExchangeRate.covertCurrency(
+                    double.parse(currencyValue.text), fromCurrency, toCurrency);
 
-              final covertedValue = CurrencyExchangeRate.covertCurrency(
-                  double.parse(currencyValue.text), fromCurrency, toCurrency);
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return Result(double.parse(currencyValue.text),
-                        covertedValue, fromCurrency, toCurrency);
-                  },
-                ),
-              );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return Result(double.parse(currencyValue.text),
+                          covertedValue, fromCurrency, toCurrency);
+                    },
+                  ),
+                );
+              }
             },
             child: Container(
               height: 50,
